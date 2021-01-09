@@ -30,9 +30,18 @@ class AddEditItemTableViewController: UITableViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        
         // prepare navigation buttons
         navigationController?.navigationBar.topItem?.backButtonTitle = "Cancel"
         navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .save, target: self, action: #selector(saveButtonPressed))
+        
+        
+        
+        // add target action to each textField of each cell
+        // if textfield is changed, it will update save button status
+        titleCell.maiTextFiled.addTarget(self, action: #selector(textFieldChanged), for: .editingChanged)
+        descriptionCell.maiTextFiled.addTarget(self, action: #selector(textFieldChanged), for: .editingChanged)
+        
         
         // If you're editing something -> edit mode. If edit nothing -> add mode
         if let currentItem = currentItem{
@@ -42,8 +51,16 @@ class AddEditItemTableViewController: UITableViewController {
         }else{
             navigationItem.title = "Add item"
         }
-    
         
+        // Detect you can save now ? or not
+        updateSaveButtonState()
+        
+    }
+    
+    // Change save button, enable or disable. If title is filled, enable.
+    func updateSaveButtonState(){
+        navigationItem.rightBarButtonItem?.isEnabled =
+            titleCell.maiTextFiled.text?.count ?? 0 > 0
     }
 
     // MARK: - Table view data source
@@ -82,14 +99,19 @@ class AddEditItemTableViewController: UITableViewController {
         let item = Todo(
             title: titleCell.maiTextFiled.text ?? "No title",
             todoDescription: descriptionCell.maiTextFiled.text ?? "",
-            priority: 0,
-            isCompleted: false
+            priority: currentItem?.priority ?? 0 , // fix later
+            isCompleted: currentItem?.isCompleted ?? false
         )
         
         currentItem == nil ?
             delegate?.addItem(todoItem: item) :
             delegate?.editItem(todoItem: item, currentPath: currentPath!)
 
+    }
+    
+    // If textField is changed
+    @objc func textFieldChanged(){
+        updateSaveButtonState()
     }
 
 }
