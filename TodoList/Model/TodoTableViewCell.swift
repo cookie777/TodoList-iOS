@@ -17,7 +17,7 @@ class TodoTableViewCell: UITableViewCell {
     
     let completionLabel: UILabel = {
         let lb = UILabel()
-        lb.text = "🔲"
+        lb.text = Symbol.unChecked
         lb.constraintWidth(equalToConstant: 40)
         lb.setContentHuggingPriority(.required, for: .horizontal)
         return lb
@@ -44,11 +44,11 @@ class TodoTableViewCell: UITableViewCell {
     
     func updateUI(todo: Todo)  {
         mainLabel.text = todo.title
-        completionLabel.text = todo.isCompleted ? "☑️" : "🔲"
+        completionLabel.text = todo.isCompleted ?  Symbol.checked : Symbol.unChecked
     }
-    
+
     func reverseCompletion(isComplete: Bool) {
-        completionLabel.text = isComplete ?  "🔲" : "☑️"
+        completionLabel.text = isComplete ?  Symbol.unChecked : Symbol.checked
     }
     
 //    override func setSelected(_ selected: Bool, animated: Bool) {
