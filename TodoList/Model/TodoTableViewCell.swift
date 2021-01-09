@@ -29,8 +29,12 @@ class TodoTableViewCell: UITableViewCell {
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         
+        
         contentView.addSubview(mainStackView)
-        mainStackView.matchParent(padding: .init(top: 16, left: 16, bottom: 16, right: 16))
+        mainStackView.matchParent(padding: .init(top: 16, left: 16, bottom: 16, right: 106))
+        
+
+        accessoryType = .detailButton
 
     }
     
@@ -43,8 +47,8 @@ class TodoTableViewCell: UITableViewCell {
         completionLabel.text = todo.isCompleted ? "☑️" : "🔲"
     }
     
-    func reverseCompletion(isComptele: Bool) {
-        completionLabel.text = isComptele ?  "🔲" : "☑️"
+    func reverseCompletion(isComplete: Bool) {
+        completionLabel.text = isComplete ?  "🔲" : "☑️"
     }
     
 //    override func setSelected(_ selected: Bool, animated: Bool) {

@@ -8,16 +8,13 @@
 import UIKit
 
 class TodoListTableViewController: UITableViewController {
-//
-//    var TodoData: [Todo] = [
-//        Todo(title: "Clean dishes", todoDescription: "desc", priority: 3, isCompleted: false),
-//        Todo(title: "Buy soy milk", todoDescription: "desc", priority: 3, isCompleted: true),
-//        Todo(title: "Sleep well", todoDescription: "desc", priority: 2, isCompleted: true),
-//        Todo(title: "Buy banana🍌", todoDescription: "desc", priority: 2, isCompleted: false),
-//        Todo(title: "Eat slowly", todoDescription: "desc", priority: 1, isCompleted: false),
-//    ]
-
     
+    var todoItems : [Todo] = Todo.sampleData
+    
+    //Create button (to make self first, I made it lazy)
+    lazy var removeButton = UIBarButtonItem(barButtonSystemItem: .trash, target: self, action: #selector(removeItems))
+    lazy var addButton = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(addButtonPressed))
+
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -25,51 +22,103 @@ class TodoListTableViewController: UITableViewController {
         
         tableView.register(TodoTableViewCell.self, forCellReuseIdentifier: todoCell)
         
-        // add edit button
+        // add edit button on left
         navigationItem.leftBarButtonItem = editButtonItem
-        // Allow editting mode to multiple seletion
+        // Allow editing mode to multiple selection
         // If cell is selected, it will invoke usual didSelectRowAt
         tableView.allowsMultipleSelectionDuringEditing = true
         
         
-        // add delete button
-        navigationItem.rightBarButtonItem =  UIBarButtonItem(barButtonSystemItem: .trash, target: self, action: #selector(removeTodo))
+        // add delete button on right (by default, not enable)
+        navigationItem.rightBarButtonItems =  [addButton, removeButton]
+        removeButton.isEnabled = false
         
-        
- 
+        // dynamic row height
+        tableView.rowHeight = UITableView.automaticDimension
+        tableView.estimatedRowHeight = 32
 
-        
-        
-        // Uncomment the following line to preserve selection between presentations
-        // self.clearsSelectionOnViewWillAppear = false
-
-        // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
-        // self.navigationItem.rightBarButtonItem = self.editButtonItem
     }
 
+    // move to Add(Edit) item screen.
+    func moveToAddEditItemVC(currentPath: IndexPath? = nil){
+        let nextVC = AddEditItemTableViewController(style: .grouped)
+        nextVC.delegate = self
+        // if you're editing, assign current selected item.
+        if let currentPath = currentPath{
+            nextVC.currentPath = currentPath
+            nextVC.currentItem = todoItems[currentPath.row]
+        }
+        navigationController?.pushViewController(nextVC, animated: true)
+    }
+
+}
+
+
+// objc functions. Actions if pressed.
+extension TodoListTableViewController{
+    @objc func addButtonPressed(){
+        moveToAddEditItemVC()
+    }
     
-    @objc func removeTodo(){
-        
+    @objc func removeItems(){
+        // Get current selected paths
         guard let indexPaths = tableView.indexPathsForSelectedRows else {return}
-        let ids = indexPaths.map {TodoData[$0.row].id}
-        TodoData.removeAll {ids.contains($0.id)}
+        // Get ids from selected paths
+        let ids = indexPaths.map {todoItems[$0.row].id}
+        // remove all items that has id by using ids
+        todoItems.removeAll {ids.contains($0.id)}
+        // update view
         tableView.deleteRows(at: indexPaths, with: .automatic)
-        print(TodoData)
-//        let indexesToRemove = indexPaths.map {$0.row}.sorted()
+        // End the deletion mode
+        removeButton.isEnabled = false
+        
+
+     //let indexesToRemove = indexPaths.map {$0.row}.sorted()
 //        var offSet = 0
 //        for var i in indexesToRemove{
 //            i -= offSet
 //            TodoData.remove(at: i)
 //            offSet += 1
 //        }
+    }
+}
+
+
+extension TodoListTableViewController: AddEditItemTableViewControllerDelegate{
+    
+    // delegator will invoke this when save button is pressed
+    func addItem(todoItem: Todo) {
         
-
-
+        // add to data
+        todoItems.insert(todoItem, at: todoItems.count)
+        // update view (warning?)
+        tableView.insertRows(at: [IndexPath(row: todoItems.count - 1, section: 0)], with: .none)
+        // back to main tableview
+        navigationController?.popToRootViewController(animated: true)
+        //print(todoItems.map{$0.title})
+    }
+    
+    // delegator will invoke this when save button is pressed
+    func editItem(todoItem: Todo, currentPath: IndexPath) {
+        print(currentPath)
+        // remove previous item
+        todoItems.remove(at: currentPath.row)
+        // add the new item
+        todoItems.insert(todoItem, at: currentPath.row)
+        // update view (warning?)
+        tableView.reloadRows(at: [currentPath], with: .none)
+        // back to main tableview
+        navigationController?.popToRootViewController(animated: true)
+//        print(todoItems.map{$0.title})
     }
     
     
-    // MARK: - Table view data source
+}
 
+
+extension TodoListTableViewController{
+    
+    // MARK: - Table view data source
     
     // How many sections?
     override func numberOfSections(in tableView: UITableView) -> Int {
@@ -80,84 +129,58 @@ class TodoListTableViewController: UITableViewController {
     // How many raws at each sections?
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of rows
-        return TodoData.count
+        return todoItems.count
     }
 
     
-    // How(What) do you create next cell from resubale cells?
+    // How(What) do you create next cell from reusable cells?
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        
+        // dequeue from reusable cell
         let cell = tableView.dequeueReusableCell(withIdentifier: todoCell, for: indexPath) as! TodoTableViewCell
-        cell.updateUI(todo:  TodoData[indexPath.row])
+        
+        // fill current content
+        cell.updateUI(todo:  todoItems[indexPath.row])
+        
+        // Specify accessory
+        cell.accessoryType = .detailButton
+        
         return cell
     }
-    
 
+    // When accessory view in cell is tapped
+    override func tableView(_ tableView: UITableView, accessoryButtonTappedForRowWith indexPath: IndexPath) {
+        
+        moveToAddEditItemVC(currentPath: indexPath)
+
+    }
+    
     // What happens When each cell is selected ?
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
 
-        // if it's editing mode, do nothing.
-        if tableView.isEditing{return}
-        
-        
-        
+        /*
+         If it's editing mode
+         - allow deletion
+         - not allow switching ☑️ switch
+         */
+        if tableView.isEditing{
+            removeButton.isEnabled = true
+            return
+        }
+
+
         // get current cell as todoTableview cell
         guard let cell = tableView.cellForRow(at: indexPath) as? TodoTableViewCell else{return}
 
         // reverse completion both cell's Label and data
-        let isComplete = TodoData[indexPath.row].isCompleted
-        cell.reverseCompletion(isComptele: isComplete)
-        TodoData[indexPath.row].isCompleted = !isComplete
+        let isComplete = todoItems[indexPath.row].isCompleted
+        cell.reverseCompletion(isComplete: isComplete)
+        todoItems[indexPath.row].isCompleted = !isComplete
 
         tableView.deselectRow(at: indexPath, animated: true)
 
     }
     
 
-
     
-    /*
-    // Override to support conditional editing of the table view.
-    override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
-        // Return false if you do not want the specified item to be editable.
-        return true
-    }
-    */
-
-    /*
-    // Override to support editing the table view.
-    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
-        if editingStyle == .delete {
-            // Delete the row from the data source
-            tableView.deleteRows(at: [indexPath], with: .fade)
-        } else if editingStyle == .insert {
-            // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
-        }    
-    }
-    */
-
-    /*
-    // Override to support rearranging the table view.
-    override func tableView(_ tableView: UITableView, moveRowAt fromIndexPath: IndexPath, to: IndexPath) {
-
-    }
-    */
-
-    /*
-    // Override to support conditional rearranging of the table view.
-    override func tableView(_ tableView: UITableView, canMoveRowAt indexPath: IndexPath) -> Bool {
-        // Return false if you do not want the item to be re-orderable.
-        return true
-    }
-    */
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
-    }
-    */
-
 }
