@@ -14,7 +14,7 @@ protocol AddEditItemTableViewControllerDelegate : class {
 
 class AddEditItemTableViewController: UITableViewController {
     
-    var headerTitles = ["Todo", "Descriptions"]
+    var headerTitles = ["Todo", "Priority","Descriptions"]
     
     // Store the current path and item you're editing. (if add -> nil)
     // path is used to specify which cell to update.
@@ -25,12 +25,14 @@ class AddEditItemTableViewController: UITableViewController {
     weak var delegate: AddEditItemTableViewControllerDelegate?
     
     // prepare what cell to use
-    var titleCell = AddEditIItemTableViewCell()
-    var descriptionCell = AddEditIItemTableViewCell()
+    var titleCell = AddEditIItemTableViewCell(style: .default, reuseIdentifier: nil, cellType: .textField)
+    var descriptionCell = AddEditIItemTableViewCell(style: .default, reuseIdentifier: nil, cellType: .textField)
+    var priorityCell = AddEditIItemTableViewCell(style: .default, reuseIdentifier: nil, cellType: .segmentControl)
 
     override func viewDidLoad() {
         super.viewDidLoad()
         
+
         // prepare navigation buttons
         navigationController?.navigationBar.topItem?.backButtonTitle = "Cancel"
         navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .save, target: self, action: #selector(saveButtonPressed))
@@ -39,15 +41,15 @@ class AddEditItemTableViewController: UITableViewController {
         
         // add target action to each textField of each cell
         // if textfield is changed, it will update save button status
-        titleCell.maiTextFiled.addTarget(self, action: #selector(textFieldChanged), for: .editingChanged)
-        descriptionCell.maiTextFiled.addTarget(self, action: #selector(textFieldChanged), for: .editingChanged)
+        titleCell.textField.addTarget(self, action: #selector(textFieldChanged), for: .editingChanged)
+        descriptionCell.textField.addTarget(self, action: #selector(textFieldChanged), for: .editingChanged)
         
         
         // If you're editing something -> edit mode. If edit nothing -> add mode
         if let currentItem = currentItem{
             navigationItem.title = "Edit item"
-            titleCell.maiTextFiled.text = currentItem.title
-            descriptionCell.maiTextFiled.text = currentItem.todoDescription
+            titleCell.textField.text = currentItem.title
+            descriptionCell.textField.text = currentItem.todoDescription
         }else{
             navigationItem.title = "Add item"
         }
@@ -60,14 +62,14 @@ class AddEditItemTableViewController: UITableViewController {
     // Change save button, enable or disable. If title is filled, enable.
     func updateSaveButtonState(){
         navigationItem.rightBarButtonItem?.isEnabled =
-            titleCell.maiTextFiled.text?.count ?? 0 > 0
+            titleCell.textField.text?.count ?? 0 > 0
     }
 
     // MARK: - Table view data source
 
     override func numberOfSections(in tableView: UITableView) -> Int {
         // #warning Incomplete implementation, return the number of sections
-        return 2
+        return headerTitles.count
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -82,6 +84,8 @@ class AddEditItemTableViewController: UITableViewController {
         case [0, 0]:
           return titleCell
         case [1, 0]:
+          return priorityCell
+        case [2, 0]:
           return descriptionCell
         default:
           fatalError("Invalid number of cells")
@@ -97,11 +101,13 @@ class AddEditItemTableViewController: UITableViewController {
     // If save  button is pressed
     @objc func saveButtonPressed(){
         let item = Todo(
-            title: titleCell.maiTextFiled.text ?? "No title",
-            todoDescription: descriptionCell.maiTextFiled.text ?? "",
-            priority: currentItem?.priority ?? 0 , // fix later
+            title: titleCell.textField.text ?? "No title",
+            todoDescription: descriptionCell.textField.text ?? "",
+            priority: priorityCell.segmentControll.selectedSegmentIndex,
             isCompleted: currentItem?.isCompleted ?? false
         )
+        
+        print(item.priority)
         
         currentItem == nil ?
             delegate?.addItem(todoItem: item) :
