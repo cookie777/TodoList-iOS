@@ -47,13 +47,11 @@ class TodoTableViewCell: UITableViewCell {
         completionLabel.text = todo.isCompleted ?  Symbol.checked : Symbol.unChecked
     }
 
-    func reverseCompletion(isComplete: Bool) {
-        completionLabel.text = isComplete ?  Symbol.unChecked : Symbol.checked
+    func reverseCompletionLabel(isCompleted: Bool) {
+        completionLabel.text = isCompleted ?  Symbol.unChecked : Symbol.checked
     }
     
-//    override func setSelected(_ selected: Bool, animated: Bool) {
-//        super.setSelected(selected, animated: animated)
-//        self.accessoryType = selected ? .checkmark : .none
-//    }
+    
+    
     
 }

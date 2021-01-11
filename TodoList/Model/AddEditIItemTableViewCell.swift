@@ -17,18 +17,35 @@ class AddEditIItemTableViewCell: UITableViewCell {
 //        return tv
 //    }()
     
-    var maiTextFiled : UITextField = {
+    var textField : UITextField = {
         let tf = UITextField()
         tf.borderStyle = .roundedRect
         return tf
     }()
     
-    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+    var segmentControl : UISegmentedControl = {
+        let items = [PriorityTitle.First, PriorityTitle.Second,PriorityTitle.Third]
+        let sc = UISegmentedControl(items: items)
+        sc.selectedSegmentIndex = 1
+        return sc
+    }()
+    
+    init(style: UITableViewCell.CellStyle, reuseIdentifier: String? ,cellType: CellType) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
-        contentView.addSubview(maiTextFiled)
-        maiTextFiled.matchParent(padding: .init(top: 8, left: 16, bottom: 8, right: 16))
-        
+
+        switch cellType {
+        case .textField:
+            contentView.addSubview(textField)
+            textField.matchParent(padding: .init(top: 8, left: 16, bottom: 8, right: 16))
+        case .segmentControl:
+            contentView.addSubview(segmentControl)
+            segmentControl.matchParent(padding: .init(top: 8, left: 16, bottom: 8, right: 16))
+        case .date:
+            print("date")
+        }
     }
+ 
+
 
     
     required init?(coder: NSCoder) {

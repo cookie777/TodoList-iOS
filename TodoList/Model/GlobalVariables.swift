@@ -10,11 +10,17 @@ import Foundation
 
 let todoCell = "todoCell"
 
-//enum mark: String {
-//    case check = "✔️", uncheck = "  "
-//}
-
 struct Symbol {
     static var checked = "✓"
     static var unChecked = " "
+}
+
+struct PriorityTitle {
+    static var First = "High"
+    static var Second = "Medium"
+    static var Third = "Low"
+}
+
+enum CellType {
+    case textField, segmentControl, date
 }
