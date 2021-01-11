@@ -41,6 +41,7 @@ class AddEditItemTableViewController: UITableViewController {
         // if textfield is changed, it will update save button status
         titleCell.textField.addTarget(self, action: #selector(textFieldChanged), for: .editingChanged)
         descriptionCell.textField.addTarget(self, action: #selector(textFieldChanged), for: .editingChanged)
+
         
         
         // If you're editing something -> edit mode. If edit nothing -> add mode

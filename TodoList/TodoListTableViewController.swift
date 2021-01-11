@@ -25,7 +25,7 @@ class TodoListTableViewController: UITableViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .white
+        view.backgroundColor = .systemBackground
 
         tableView.register(TodoTableViewCell.self, forCellReuseIdentifier: todoCell)
         
@@ -60,6 +60,7 @@ class TodoListTableViewController: UITableViewController {
         
         navigationController?.pushViewController(nextVC, animated: true)
     }
+
 
 }
 
@@ -112,8 +113,6 @@ extension TodoListTableViewController{
         tableView.deselectRow(at: indexPath, animated: true)
         moveToAddEditItemVC(selectedPath: indexPath)
     }
-    
-    
 }
 
 
@@ -123,7 +122,7 @@ extension TodoListTableViewController{
 
 
 
-// MARK: - Prepare reusable cell + with gesture recognizer
+// MARK: - Prepare reusable cell + completion feature
 
 //Custom tapGR to add indexPath
 class CompletionTapGestureRecognizer: UITapGestureRecognizer {
@@ -166,6 +165,24 @@ extension TodoListTableViewController{
         todoItems[tappedIndex].isCompleted = !todoItems[tappedIndex].isCompleted
         
         tableView.reloadRows(at: [tappedIndexPath], with: .none)
+    }
+    
+    
+    override func tableView(_ tableView: UITableView, leadingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+        
+        let swipedIndex = calculateIndexFromIndexPath(indexPath: indexPath)
+        let swipeTitle = todoItems[swipedIndex].isCompleted ? "Uncheck" : "Done"
+        
+        let closeAction = UIContextualAction(
+            style: .normal, title: swipeTitle, handler: { (ac:UIContextualAction, view:UIView, success:(Bool) -> Void) in
+                self.todoItems[swipedIndex].isCompleted = !self.todoItems[swipedIndex].isCompleted
+                    tableView.reloadRows(at: [indexPath], with: .none)
+                    success(true)
+                }
+            )
+        closeAction.backgroundColor = .systemGreen
+     
+             return UISwipeActionsConfiguration(actions: [closeAction])
     }
     
 }
