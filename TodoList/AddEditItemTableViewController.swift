@@ -8,8 +8,8 @@
 import UIKit
 
 protocol AddEditItemTableViewControllerDelegate : class {
-    func addItem(todoItem: Todo)
-    func editItem(todoItem: Todo, currentPath: IndexPath)
+    func addItem(newItem: Todo)
+    func editItem(editedItem: Todo, selectedPath: IndexPath)
 }
 
 class AddEditItemTableViewController: UITableViewController {
@@ -18,8 +18,8 @@ class AddEditItemTableViewController: UITableViewController {
     
     // Store the current path and item you're editing. (if add -> nil)
     // path is used to specify which cell to update.
-    var currentPath : IndexPath?
-    var currentItem : Todo?
+    var selectedPath : IndexPath?
+    var selectedItem : Todo?
     
     // receive those who delegate
     weak var delegate: AddEditItemTableViewControllerDelegate?
@@ -46,10 +46,11 @@ class AddEditItemTableViewController: UITableViewController {
         
         
         // If you're editing something -> edit mode. If edit nothing -> add mode
-        if let currentItem = currentItem{
+        if let selectedItem = selectedItem{
             navigationItem.title = "Edit item"
-            titleCell.textField.text = currentItem.title
-            descriptionCell.textField.text = currentItem.todoDescription
+            titleCell.textField.text = selectedItem.title
+            descriptionCell.textField.text = selectedItem.todoDescription
+            priorityCell.segmentControl.selectedSegmentIndex = selectedItem.priority
         }else{
             navigationItem.title = "Add item"
         }
@@ -103,15 +104,13 @@ class AddEditItemTableViewController: UITableViewController {
         let item = Todo(
             title: titleCell.textField.text ?? "No title",
             todoDescription: descriptionCell.textField.text ?? "",
-            priority: priorityCell.segmentControll.selectedSegmentIndex,
-            isCompleted: currentItem?.isCompleted ?? false
+            priority: priorityCell.segmentControl.selectedSegmentIndex,
+            isCompleted: selectedItem?.isCompleted ?? false
         )
-        
-        print(item.priority)
-        
-        currentItem == nil ?
-            delegate?.addItem(todoItem: item) :
-            delegate?.editItem(todoItem: item, currentPath: currentPath!)
+
+        selectedItem == nil ?
+            delegate?.addItem(newItem: item) :
+            delegate?.editItem(editedItem: item, selectedPath: selectedPath!)
 
     }
     

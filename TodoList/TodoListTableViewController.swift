@@ -46,21 +46,24 @@ class TodoListTableViewController: UITableViewController {
     }
 
     // move to Add(Edit) item screen.
-    func moveToAddEditItemVC(currentPath: IndexPath? = nil){
+    func moveToAddEditItemVC(selectedPath: IndexPath? = nil){
         let nextVC = AddEditItemTableViewController(style: .grouped)
         nextVC.delegate = self
-        // if you're editing, assign current selected item.
-        if let currentPath = currentPath{
-            nextVC.currentPath = currentPath
-            nextVC.currentItem = todoItems[currentPath.row]
+        
+        // if you're editing, Get current IndexPath and index of items
+        // and then assign to next VC
+        if let selectedPath = selectedPath {
+            let selectedIndex = calculateTodoItemsIndexFromPriorityIndexPath(indexPath: selectedPath)
+            nextVC.selectedPath = selectedPath
+            nextVC.selectedItem = todoItems[selectedIndex]
         }
+        
         navigationController?.pushViewController(nextVC, animated: true)
     }
 
 }
 
-
-// objc functions. Actions if pressed.
+// MARK: - objc functions. Actions if pressed.
 extension TodoListTableViewController{
     @objc func addButtonPressed(){
         moveToAddEditItemVC()
@@ -69,8 +72,8 @@ extension TodoListTableViewController{
     @objc func removeItems(){
         // Get current selected paths
         guard let indexPaths = tableView.indexPathsForSelectedRows else {return}
-        // Get ids from selected paths
         
+        // Get ids from selected paths
         let ids = indexPaths.map { (indexPath)->String in
             let index = calculateTodoItemsIndexFromPriorityIndexPath(indexPath: indexPath)
             return todoItems[index].id
@@ -86,16 +89,16 @@ extension TodoListTableViewController{
     }
 }
 
-
+// MARK: - AddEditItem TableViewController Delegate
 extension TodoListTableViewController: AddEditItemTableViewControllerDelegate{
     
     // delegator will invoke this when save button is pressed
-    func addItem(todoItem: Todo) {
+    func addItem(newItem: Todo) {
  
-        let (insertIndex, insertIndexPath) = calculateInsertPriorityIndexFromTodoItem(item: todoItem)
+        let (insertIndex, insertIndexPath) = calculateInsertPriorityIndexFromTodoItem(item: newItem)
         
         // add to data
-        todoItems.insert(todoItem, at: insertIndex)
+        todoItems.insert(newItem, at: insertIndex)
         // update view (warning?)
         tableView.insertRows(at: [insertIndexPath], with: .none)
         // back to main tableview
@@ -104,21 +107,31 @@ extension TodoListTableViewController: AddEditItemTableViewControllerDelegate{
     }
     
     // delegator will invoke this when save button is pressed
-    func editItem(todoItem: Todo, currentPath: IndexPath) {
-        print(currentPath)
-        // remove previous item
-        todoItems.remove(at: currentPath.row)
-        // add the new item
-        todoItems.insert(todoItem, at: currentPath.row)
+    func editItem(editedItem: Todo, selectedPath: IndexPath) {
+
+        // When there is a multi section, remove place != insert place
+        
+        // remove old(selected) item
+        let selectedIndex = calculateTodoItemsIndexFromPriorityIndexPath(indexPath: selectedPath)
+        todoItems.remove(at: selectedIndex)
+        // update view
+        tableView.deleteRows(at: [selectedPath], with: .none)
+        
+        // Insert new(edited) item
+        let (insertIndex, insertIndexPath) = calculateInsertPriorityIndexFromTodoItem(item: editedItem)
+        todoItems.insert(editedItem, at: insertIndex)
+        
         // update view (warning?)
-        tableView.reloadRows(at: [currentPath], with: .none)
+        tableView.insertRows(at: [insertIndexPath], with: .none)
         // back to main tableview
         navigationController?.popToRootViewController(animated: true)
 
     }
-    
-    
-    
+}
+
+
+// MARK: - Conversion between Index and IndexPath
+extension TodoListTableViewController{
     /*
      Get the index of todoItems from IndexPath split by priority
      eg,  [0,0,0,1,1,1,1,2,2,2,"2",3,3,3,3,3]
@@ -126,7 +139,7 @@ extension TodoListTableViewController: AddEditItemTableViewControllerDelegate{
         "first index of 2 (8th)" + 3 == 11th index in zeroSection index.
      */
     func calculateTodoItemsIndexFromPriorityIndexPath(indexPath: IndexPath)->Int{
-        guard let firstIndexOfTheSection =  todoItems.firstIndex(where: {$0.priority == indexPath.section})else{return -1} // -1 is not good. May be better to change nil
+        guard let firstIndexOfTheSection =  todoItems.firstIndex(where: {$0.priority >= indexPath.section})else{return todoItems.count} // -1 is not good. May be better to change nil
         return firstIndexOfTheSection + indexPath.row
     }
     
@@ -135,7 +148,7 @@ extension TodoListTableViewController: AddEditItemTableViewControllerDelegate{
      */
     func calculatePriorityIndexPathFromTodoItemsIndex(index: Int)->IndexPath{
         let currentSection = todoItems[index].priority
-        guard let section =  todoItems.firstIndex(where: {$0.priority == currentSection}) else{return IndexPath()} // IndexPath(0,0) is not good. May be better to change nil
+        guard let section =  todoItems.firstIndex(where: {$0.priority >= currentSection}) else{return IndexPath()} // IndexPath(0,0) is not good. May be better to change nil
         
         let row = index - section
         return IndexPath(row: row, section: section)
@@ -147,8 +160,33 @@ extension TodoListTableViewController: AddEditItemTableViewControllerDelegate{
      */
     func calculateInsertPriorityIndexFromTodoItem(item: Todo) -> (Int, IndexPath) {
         let currentSection = item.priority
-        let lastIndexOfSection = todoItems.lastIndex(where: {$0.priority == currentSection}) ?? 0
-        let firstIndexOfSection = todoItems.firstIndex(where: {$0.priority == currentSection}) ?? 0
+        
+        /*
+         Basic idea:
+            - [,,,,f,,,,,,l,,,,,]
+         
+            - f is first index that (element >= section number).
+                - > is important because there could be no section
+            - l is last index that (element <= section number)
+            - This means "from f to l" represents the section
+         
+            - When you insert new item at this section,
+                the item should insert at (l + 1) index.
+            - And the row at section is "(l + 1) - f"
+         
+            - If there is no element at section, f and l position crosses but this is ok
+                - [,,,,l,f,,,,,]
+         
+            - If there every element is > section number,
+                l must be "-1" -> insert index becomes 0
+            - l [f,,,,,,]
+         
+             - If there every element is < section number,
+                 f must be "arr.count"
+             - [,,,,,,,,l] f
+         */        
+        let lastIndexOfSection = todoItems.lastIndex(where: {$0.priority <= currentSection}) ?? -1
+        let firstIndexOfSection = todoItems.firstIndex(where: {$0.priority >= currentSection}) ?? todoItems.count
 
         let insertIndex = lastIndexOfSection + 1
         let insertPath = IndexPath(row: lastIndexOfSection - firstIndexOfSection + 1, section: currentSection)
@@ -159,9 +197,8 @@ extension TodoListTableViewController: AddEditItemTableViewControllerDelegate{
 }
 
 
+// MARK: - Table view data source
 extension TodoListTableViewController{
-    
-    // MARK: - Table view data source
     
     // How many sections?
     override func numberOfSections(in tableView: UITableView) -> Int {
@@ -196,7 +233,7 @@ extension TodoListTableViewController{
     // When accessory view in cell is tapped
     override func tableView(_ tableView: UITableView, accessoryButtonTappedForRowWith indexPath: IndexPath) {
         
-        moveToAddEditItemVC(currentPath: indexPath)
+        moveToAddEditItemVC(selectedPath: indexPath)
 
     }
     
@@ -233,6 +270,21 @@ extension TodoListTableViewController{
         return prioritySectionHeaders[section]
     }
     
+    // Define moving cell
+    override func tableView(_ tableView: UITableView, moveRowAt sourceIndexPath: IndexPath, to destinationIndexPath: IndexPath) {
+        
+        let sourceIndex = calculateTodoItemsIndexFromPriorityIndexPath(indexPath: sourceIndexPath)
+        var movingItem = todoItems.remove(at: sourceIndex)
+        movingItem.priority = destinationIndexPath.section
+
+        
+        let destinationIndex = calculateTodoItemsIndexFromPriorityIndexPath(indexPath: destinationIndexPath)
+
+        todoItems.insert(movingItem, at: destinationIndex)
+
+
+        
+    }
 
     
 }

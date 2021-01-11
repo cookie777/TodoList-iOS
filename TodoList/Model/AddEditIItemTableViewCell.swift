@@ -23,7 +23,7 @@ class AddEditIItemTableViewCell: UITableViewCell {
         return tf
     }()
     
-    var segmentControll : UISegmentedControl = {
+    var segmentControl : UISegmentedControl = {
         let items = [PriorityTitle.First, PriorityTitle.Second,PriorityTitle.Third]
         let sc = UISegmentedControl(items: items)
         sc.selectedSegmentIndex = 1
@@ -38,8 +38,8 @@ class AddEditIItemTableViewCell: UITableViewCell {
             contentView.addSubview(textField)
             textField.matchParent(padding: .init(top: 8, left: 16, bottom: 8, right: 16))
         case .segmentControl:
-            contentView.addSubview(segmentControll)
-            segmentControll.matchParent(padding: .init(top: 8, left: 16, bottom: 8, right: 16))
+            contentView.addSubview(segmentControl)
+            segmentControl.matchParent(padding: .init(top: 8, left: 16, bottom: 8, right: 16))
         case .date:
             print("date")
         }
