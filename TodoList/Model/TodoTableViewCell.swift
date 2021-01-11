@@ -18,11 +18,14 @@ class TodoTableViewCell: UITableViewCell {
     let completionLabel: UILabel = {
         let lb = UILabel()
         lb.text = Symbol.unChecked
+        lb.textAlignment = .center
         lb.constraintWidth(equalToConstant: 40)
         lb.setContentHuggingPriority(.required, for: .horizontal)
         return lb
     }()
     
+
+
     lazy var mainStackView: UIStackView = HorizontalStackView(arrangedSubviews: [completionLabel, mainLabel], spacing: 16, alignment: .fill ,distribution: .fill)
 
     
@@ -32,9 +35,6 @@ class TodoTableViewCell: UITableViewCell {
         
         contentView.addSubview(mainStackView)
         mainStackView.matchParent(padding: .init(top: 16, left: 16, bottom: 16, right: 106))
-        
-
-        accessoryType = .detailButton
 
     }
     
@@ -50,7 +50,6 @@ class TodoTableViewCell: UITableViewCell {
     func reverseCompletionLabel(isCompleted: Bool) {
         completionLabel.text = isCompleted ?  Symbol.unChecked : Symbol.checked
     }
-    
     
     
     

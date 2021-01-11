@@ -31,14 +31,12 @@ class AddEditItemTableViewController: UITableViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        
 
         // prepare navigation buttons
         navigationController?.navigationBar.topItem?.backButtonTitle = "Cancel"
         navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .save, target: self, action: #selector(saveButtonPressed))
         
-        
-        
+ 
         // add target action to each textField of each cell
         // if textfield is changed, it will update save button status
         titleCell.textField.addTarget(self, action: #selector(textFieldChanged), for: .editingChanged)
@@ -54,6 +52,11 @@ class AddEditItemTableViewController: UITableViewController {
         }else{
             navigationItem.title = "Add item"
         }
+        
+        // dynamic row height
+        tableView.rowHeight = UITableView.automaticDimension
+        tableView.estimatedRowHeight = 32
+        
         
         // Detect you can save now ? or not
         updateSaveButtonState()

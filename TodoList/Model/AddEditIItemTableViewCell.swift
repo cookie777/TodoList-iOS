@@ -9,7 +9,7 @@ import UIKit
 
 class AddEditIItemTableViewCell: UITableViewCell {
 
-//    var maiTextView : UITextView = {
+//    var textView : UITextView = {
 //        let tv = UITextView()
 ////        tv.constraintHeight(equalToConstant: 64)
 //        tv.isEditable = true
