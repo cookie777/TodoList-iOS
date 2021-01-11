@@ -30,6 +30,7 @@ class TodoListTableViewController: UITableViewController {
         
         // add edit button on left
         navigationItem.leftBarButtonItem = editButtonItem
+        setEditing(false, animated: false)
         // Allow editing mode to multiple selection
         // If cell is selected, it will invoke usual didSelectRowAt
         tableView.allowsMultipleSelectionDuringEditing = true
@@ -37,7 +38,6 @@ class TodoListTableViewController: UITableViewController {
         
         // add delete button on right (by default, not enable)
         navigationItem.rightBarButtonItems =  [addButton, removeButton]
-        removeButton.isEnabled = false
         
         // dynamic row height
         tableView.rowHeight = UITableView.automaticDimension
@@ -84,9 +84,9 @@ extension TodoListTableViewController{
         tableView.deleteRows(at: indexPaths, with: .automatic)
         // End the deletion mode
         removeButton.isEnabled = false
-//        print(todoItems.map{$0.title})
         
     }
+    
 }
 
 // MARK: - AddEditItem TableViewController Delegate
@@ -103,7 +103,6 @@ extension TodoListTableViewController: AddEditItemTableViewControllerDelegate{
         tableView.insertRows(at: [insertIndexPath], with: .none)
         // back to main tableview
         navigationController?.popToRootViewController(animated: true)
-//        print(todoItems.map{$0.title})
     }
     
     // delegator will invoke this when save button is pressed
@@ -139,7 +138,10 @@ extension TodoListTableViewController{
         "first index of 2 (8th)" + 3 == 11th index in zeroSection index.
      */
     func calculateTodoItemsIndexFromPriorityIndexPath(indexPath: IndexPath)->Int{
-        guard let firstIndexOfTheSection =  todoItems.firstIndex(where: {$0.priority >= indexPath.section})else{return todoItems.count} // -1 is not good. May be better to change nil
+        
+        // If no larger element than section == insert last
+        guard let firstIndexOfTheSection =  todoItems.firstIndex(where: {$0.priority >= indexPath.section})else{return todoItems.count}
+        
         return firstIndexOfTheSection + indexPath.row
     }
     
@@ -273,18 +275,47 @@ extension TodoListTableViewController{
     // Define moving cell
     override func tableView(_ tableView: UITableView, moveRowAt sourceIndexPath: IndexPath, to destinationIndexPath: IndexPath) {
         
+        
+        // get source index and delete from items
         let sourceIndex = calculateTodoItemsIndexFromPriorityIndexPath(indexPath: sourceIndexPath)
         var movingItem = todoItems.remove(at: sourceIndex)
         movingItem.priority = destinationIndexPath.section
 
         
+        // get destination index and insert to items
+        // this is possible, because when you convert index from IndexPath, the items are already update(removed)
         let destinationIndex = calculateTodoItemsIndexFromPriorityIndexPath(indexPath: destinationIndexPath)
-
         todoItems.insert(movingItem, at: destinationIndex)
-
-
-        
     }
 
+    
+    
+    
+    // Prepare to swipe deletion
+    override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
+        return true
+    }
+    // While editing style, whenever they are done, this method is triggered.
+    // eg, - edit button -> press delete button.
+    //     - swipe and delete
+    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+        
+        if editingStyle == .delete{
+            let currentIndex = calculateTodoItemsIndexFromPriorityIndexPath(indexPath: indexPath)
+            todoItems.remove(at: currentIndex)
+            // update view
+            tableView.deleteRows(at: [indexPath], with: .automatic)
+        }
+    }
+    
+    override func setEditing(_ editing: Bool, animated: Bool) {
+        super.setEditing(editing, animated: true)
+        if editing{
+            self.editButtonItem.title = "Cancel"
+        } else{
+            self.editButtonItem.title = "Select"
+            removeButton.isEnabled = false
+        }
+    }
     
 }
