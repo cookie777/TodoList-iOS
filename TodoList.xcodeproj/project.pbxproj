@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		482A159B25AC53730013C4B8 /* Date+Unit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 482A159A25AC53730013C4B8 /* Date+Unit.swift */; };
 		489327C725A8341B00F7CA0B /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 489327C625A8341B00F7CA0B /* AppDelegate.swift */; };
 		489327C925A8341B00F7CA0B /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 489327C825A8341B00F7CA0B /* SceneDelegate.swift */; };
 		489327D025A8341D00F7CA0B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 489327CF25A8341D00F7CA0B /* Assets.xcassets */; };
@@ -25,6 +26,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		482A159A25AC53730013C4B8 /* Date+Unit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Date+Unit.swift"; sourceTree = "<group>"; };
 		489327C325A8341B00F7CA0B /* TodoList.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TodoList.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		489327C625A8341B00F7CA0B /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		489327C825A8341B00F7CA0B /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -122,6 +124,7 @@
 				489327F125A8436800F7CA0B /* UILabel+LineSpacing.swift */,
 				489327F225A8436800F7CA0B /* UIEdgeInsetsnilAcceptable.swift */,
 				489327F325A8436800F7CA0B /* UIView+ConstraintLayout.swift */,
+				482A159A25AC53730013C4B8 /* Date+Unit.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -200,6 +203,7 @@
 				489327F525A8436800F7CA0B /* VerticalStackView.swift in Sources */,
 				48DB36CE25A92D100035A257 /* AddEditItemTableViewController.swift in Sources */,
 				48DB36D125A931250035A257 /* AddEditIItemTableViewCell.swift in Sources */,
+				482A159B25AC53730013C4B8 /* Date+Unit.swift in Sources */,
 				489327F825A8436800F7CA0B /* UIView+ConstraintLayout.swift in Sources */,
 				489327C725A8341B00F7CA0B /* AppDelegate.swift in Sources */,
 				489327F625A8436800F7CA0B /* UILabel+LineSpacing.swift in Sources */,

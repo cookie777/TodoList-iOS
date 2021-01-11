@@ -29,6 +29,7 @@ class AddEditIItemTableViewCell: UITableViewCell {
         sc.selectedSegmentIndex = 1
         return sc
     }()
+
     
     init(style: UITableViewCell.CellStyle, reuseIdentifier: String? ,cellType: CellType) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
